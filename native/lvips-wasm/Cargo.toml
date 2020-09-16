@@ -1,0 +1,16 @@
+[package]
+name = "lvips-wasm"
+version = "0.1.0"
+authors = ["Dumitru Postolachi <dumitru.postolachi@daliaresearch.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+
+[build-dependencies]
+bindgen = "0.53.1"
