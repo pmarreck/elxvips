@@ -8,31 +8,31 @@ mod libvips;
 use libvips::{VipsImage, VipsFormat};
 use libvips::save_options::{JpegSaveOptions, PngSaveOptions, WebPSaveOptions, SmartcropOptions, Interesting};
 
-mod atoms {
-    rustler::rustler_atoms! {
-        atom ok;
-        atom error;
-        atom auto;
-        atom none;
-        atom png;
-        atom jpg;
-        atom webp;
-        //atom __true__ = "true";
-        //atom __false__ = "false";
+mod atom {
+    rustler::atoms! {
+        ok,
+        error,
+        auto,
+        none,
+        png,
+        jpg,
+        webp,
+        //__true__ = "true";
+        //__false__ = "false";
     }
 }
 
 
-#[module = "Elxvips.ResizeOptions"]
 #[derive(NifStruct, Debug)]
+#[module = "Elxvips.ResizeOptions"]
 struct ResizeOptions<'a> {
     pub width: Term<'a>,
     pub height: Term<'a>,
     pub resize_type: Term<'a>,
 }
 
-#[module = "Elxvips.SaveOptions"]
 #[derive(NifStruct, Debug)]
+#[module = "Elxvips.SaveOptions"]
 struct SaveOptions<'a> {
     quality: u8,
     strip: bool,
@@ -42,16 +42,16 @@ struct SaveOptions<'a> {
     background: Vec<f64>,
 }
 
-#[module = "Elxvips.ImageFile"]
 #[derive(NifStruct, Debug)]
+#[module = "Elxvips.ImageFile"]
 struct ImageFile<'a> {
     pub path: &'a str,
     pub resize: ResizeOptions<'a>,
     pub save: SaveOptions<'a>,
 }
 
-#[module = "Elxvips.ImageBytes"]
 #[derive(NifStruct, Debug)]
+#[module = "Elxvips.ImageBytes"]
 struct ImageBytes<'a> {
     pub bytes: Vec<u8>,
     pub resize: ResizeOptions<'a>,
@@ -84,9 +84,9 @@ static SMART_CROP_OPTS: SmartcropOptions = SmartcropOptions {
 
 fn format_to_atom( format: VipsFormat ) -> Atom {
     match format {
-        VipsFormat::JPEG => atoms::jpg(),
-        VipsFormat::PNG => atoms::png(),
-        VipsFormat::WEBP => atoms::webp(),
+        VipsFormat::JPEG => atom::jpg(),
+        VipsFormat::PNG => atom::png(),
+        VipsFormat::WEBP => atom::webp(),
     }
 }
 
@@ -95,10 +95,10 @@ fn image_into_bytes<'a>(image: VipsImage, save_options: SaveOptions) -> Result<V
     match save_options.format.decode::<Atom>() {
         Ok( atom_format ) => {
             let vips_format = match atom_format {
-                format if format == atoms::jpg() => VipsFormat::JPEG,
-                format if format == atoms::png() => VipsFormat::PNG,
-                format if format == atoms::webp() => VipsFormat::WEBP,
-                format if format == atoms::auto() => image.get_format().unwrap(),
+                format if format == atom::jpg() => VipsFormat::JPEG,
+                format if format == atom::png() => VipsFormat::PNG,
+                format if format == atom::webp() => VipsFormat::WEBP,
+                format if format == atom::auto() => image.get_format().unwrap(),
                 _ => {
                     return Err( "format not supported".to_string() )
                 }
@@ -180,8 +180,8 @@ fn get_image_bytes_sizes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>
         Err( _ ) => Err( "failed to parse input data".to_string() )
     };
     match result {
-        Ok( bytes ) => Ok( ( atoms::ok(), bytes.encode( env ) ).encode( env ) ),
-        Err( error_str ) => Ok( ( atoms::error(), error_str ).encode( env ) )
+        Ok( bytes ) => Ok( ( atom::ok(), bytes.encode( env ) ).encode( env ) ),
+        Err( error_str ) => Ok( ( atom::error(), error_str ).encode( env ) )
     }
 }
 
@@ -199,8 +199,8 @@ fn get_image_file_format<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>
     };
 
     match result {
-        Ok( format ) => Ok( ( atoms::ok(), format_to_atom( format ) ).encode( env ) ),
-        Err( err ) => Ok( ( atoms::error(), err ).encode( env ) )
+        Ok( format ) => Ok( ( atom::ok(), format_to_atom( format ) ).encode( env ) ),
+        Err( err ) => Ok( ( atom::error(), err ).encode( env ) )
     }
 }
 
@@ -217,8 +217,8 @@ fn get_image_bytes_format<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a
         Err( _ ) => Err( "failed to parse input data".to_string() )
     };
     match result {
-        Ok( format ) => Ok( ( atoms::ok(), format_to_atom( format ) ).encode( env ) ),
-        Err( error_str ) => Ok( ( atoms::error(), error_str ).encode( env ) )
+        Ok( format ) => Ok( ( atom::ok(), format_to_atom( format ) ).encode( env ) ),
+        Err( error_str ) => Ok( ( atom::error(), error_str ).encode( env ) )
     }
 }
 
@@ -248,15 +248,15 @@ fn get_image_sizes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Erro
     };
 
     match result {
-        Ok( image_sizes ) => Ok( ( atoms::ok(), image_sizes.encode( env ) ).encode( env ) ),
-        Err( error_str ) => Ok( ( atoms::error(), error_str ).encode( env ) )
+        Ok( image_sizes ) => Ok( ( atom::ok(), image_sizes.encode( env ) ).encode( env ) ),
+        Err( error_str ) => Ok( ( atom::error(), error_str ).encode( env ) )
     }
 }
 
 fn set_concurrency<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>, Error> {
     let concurrency: u8 = args[0].decode()?;
     libvips::concurrency_set( concurrency as i32 );
-    Ok( ( atoms::ok() ).encode( env ) )
+    Ok( ( atom::ok() ).encode( env ) )
 }
 
 fn resize_image<'a>(image: VipsImage, resize: &ResizeOptions<'a>) -> Result<VipsImage, String> {
@@ -316,10 +316,10 @@ fn save_image<'a>( image: &VipsImage, save_options: &SaveOptions<'a> ) -> Result
     match save_options.format.decode::<Atom>() {
         Ok( atom_format ) => {
             let vips_format = match atom_format {
-                format if format == atoms::jpg() => VipsFormat::JPEG,
-                format if format == atoms::png() => VipsFormat::PNG,
-                format if format == atoms::webp() => VipsFormat::WEBP,
-                format if format == atoms::auto() => image.get_format().unwrap(),
+                format if format == atom::jpg() => VipsFormat::JPEG,
+                format if format == atom::png() => VipsFormat::PNG,
+                format if format == atom::webp() => VipsFormat::WEBP,
+                format if format == atom::auto() => image.get_format().unwrap(),
                 _ => {
                     return Err( "format not supported".to_string() )
                 }
@@ -396,8 +396,8 @@ fn process_file_to_file<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>,
     };
 
     match result {
-        Ok( _ ) => Ok( ( atoms::ok() ).encode( env ) ),
-        Err( err ) => Ok( ( atoms::error(), err ).encode( env ) )
+        Ok( _ ) => Ok( ( atom::ok() ).encode( env ) ),
+        Err( err ) => Ok( ( atom::error(), err ).encode( env ) )
     }
 }
 
@@ -421,8 +421,8 @@ fn process_file_to_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>
     };
 
     match result {
-        Ok( bytes ) => Ok( ( atoms::ok(), bytes ).encode( env ) ),
-        Err( err ) => Ok( ( atoms::error(), err ).encode( env ) )
+        Ok( bytes ) => Ok( ( atom::ok(), bytes ).encode( env ) ),
+        Err( err ) => Ok( ( atom::error(), err ).encode( env ) )
     }
 }
 
@@ -445,8 +445,8 @@ fn process_bytes_to_bytes<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a
     };
 
     match result {
-        Ok( bytes ) => Ok( ( atoms::ok(), bytes ).encode( env ) ),
-        Err( err ) => Ok( ( atoms::error(), err ).encode( env ) )
+        Ok( bytes ) => Ok( ( atom::ok(), bytes ).encode( env ) ),
+        Err( err ) => Ok( ( atom::error(), err ).encode( env ) )
     }
 }
 
@@ -469,7 +469,7 @@ fn process_bytes_to_file<'a>(env: Env<'a>, args: &[Term<'a>]) -> Result<Term<'a>
     };
 
     match result {
-        Ok( () ) => Ok( ( atoms::ok() ).encode( env ) ),
-        Err( err ) => Ok( ( atoms::error(), err ).encode( env ) )
+        Ok( () ) => Ok( ( atom::ok() ).encode( env ) ),
+        Err( err ) => Ok( ( atom::error(), err ).encode( env ) )
     }
 }
