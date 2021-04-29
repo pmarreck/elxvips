@@ -13,7 +13,7 @@ RUN set -x -o pipefail \
     git curl build-base clang zlib libxml2 glib gobject-introspection \
     libjpeg-turbo libexif lcms2 fftw giflib libpng \
     libwebp orc tiff poppler-glib librsvg libgsf openexr \
-    libheif libimagequant pango \
+    libheif libimagequant pango-dev \
  && apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community --repository http://dl-3.alpinelinux.org/alpine/edge/main vips-dev
 
 # Install Elixir, Erlang (latter automatically as dep)
