@@ -43,8 +43,8 @@ defmodule Elxvips.MixProject do
     [
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
-      {:rustler, ">= 0.22.0-rc.0"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:rustler, ">= 0.22.0-rc.1"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
     ]
   end
 
